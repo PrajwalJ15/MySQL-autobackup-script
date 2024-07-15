@@ -1,0 +1,53 @@
+#!/bin/bash
+
+############### Prajwal - Edit them accordingly  ########################
+
+DATE=$(date +%Y-%m-%d_%H-%M-%S)
+LOCAL_BACKUP_DIR="/home/alpine/backups"
+DB_NAME="YNR_live"
+DB_USER="mitapp"
+DB_PASSWORD="GnP27#!m"
+
+FTP_SERVER="43.241.69.179"
+FTP_USERNAME="ftpadmin"
+FTP_PASSWORD="Hpe2BnPs"
+FTP_UPLOAD_DIR="/Private clients/YNR"
+
+LOG_FILE="$LOCAL_BACKUP_DIR/backup-$DATE.log"
+find "/home/alpine/backups" -name backup* -mtime +1 -exec rm {} \;
+
+############### Local Backup  ########################
+
+mysqldump -u $DB_USER -p$DB_PASSWORD $DB_NAME | gzip > "$LOCAL_BACKUP_DIR/$DB_NAME-$DATE.sql.gz"
+
+if [ $? -eq 0 ]; then
+    echo "[$(date +%Y-%m-%d_%H:%M:%S)] Backup successful: $LOCAL_BACKUP_DIR/$DB_NAME-$DATE.sql.gz" >> $LOG_FILE
+else
+    echo "[$(date +%Y-%m-%d_%H:%M:%S)] Backup failed" >> $LOG_FILE
+    exit 1
+fi
+
+############### UPLOAD to FTP Server  ################
+
+lftp -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER <<- EndFTP >> $LOG_FILE 2>&1
+set ftp:ssl-allow no
+cd "$FTP_UPLOAD_DIR"
+lcd "$LOCAL_BACKUP_DIR"
+put "$DB_NAME-$DATE.sql.gz"
+bye
+EndFTP
+
+if [ $? -eq 0 ]; then
+    echo "[$(date +%Y-%m-%d_%H:%M:%S)] FTP upload successful: $DB_NAME-$DATE.sql.gz" >> $LOG_FILE
+else
+    echo "[$(date +%Y-%m-%d_%H:%M:%S)] FTP upload failed" >> $LOG_FILE
+    exit 1
+fi
+
+############### Optional: Send an email notification  ################
+
+# Uncomment and configure the following lines if you wish to send an email notification.
+# EMAIL_TO="your-email@example.com"
+# EMAIL_SUBJECT="Backup Log for $DATE"
+# EMAIL_BODY="Please find the backup log attached."
+# mail -s "$EMAIL_SUBJECT" -a "$LOG_FILE" "$EMAIL_TO" <<< "$EMAIL_BODY"
