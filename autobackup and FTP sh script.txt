@@ -1,20 +1,20 @@
 #!/bin/bash
 
-############### Prajwal - Edit them accordingly  ########################
+############### Prajwal Jadhav ########################
 
 DATE=$(date +%Y-%m-%d_%H-%M-%S)
 LOCAL_BACKUP_DIR="/home/alpine/backups"
-DB_NAME="YNR_live"
-DB_USER="mitapp"
-DB_PASSWORD="GnP27#!m"
+DB_NAME="db_name"
+DB_USER="root"
+DB_PASSWORD="root"
 
-FTP_SERVER="43.241.69.179"
-FTP_USERNAME="ftpadmin"
-FTP_PASSWORD="Hpe2BnPs"
-FTP_UPLOAD_DIR="/Private clients/YNR"
+FTP_SERVER="give IP"
+FTP_USERNAME="FTP server user"
+FTP_PASSWORD="FTP server password"
+FTP_UPLOAD_DIR="location where you want to save file"
 
 LOG_FILE="$LOCAL_BACKUP_DIR/backup-$DATE.log"
-find "/home/alpine/backups" -name backup* -mtime +1 -exec rm {} \;
+find "/home/prajwal/backups" -name backup* -mtime +1 -exec rm {} \;
 
 ############### Local Backup  ########################
 
